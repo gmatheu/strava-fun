@@ -1,5 +1,5 @@
 (set-env!
-  :source-paths #{"src"}
+  :source-paths #{"src/**/*.clj"}
   :dependencies '[[org.clojure/clojure "1.6.0"]
                   [org.clojure/data.json "0.2.6"]
                   [clj-http "1.1.2"]])

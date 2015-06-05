@@ -1,33 +1,20 @@
 (ns strava-fun.core
-  (:require [clojure.data.json :as json]
-            [clj-http.client :as client])
+  (:require [clojure.tools.cli :refer [parse-opts]])
   (:gen-class))
 
+(def cli-options
+  [["-t" "--token TOKEN" "Strava Api Auth Token"]])
 
-(defn -main
-  "I don't do a whole lot ... yet."
-  [& args]
-  (println "Hello, World!"))
+(defn exit [status msg]
+    (println msg)
+    (System/exit status))
 
+(defn do-it [options action]
+  (println (str "Doing " action " with token: " (:token options))))
 
-(def opts {:headers {"Authorization" "Bearer secret"}})
-(def activities 
-  (json/read-str 
-    (:body (client/get "https://www.strava.com/api/v3/athlete/activities" opts)) 
-    :key-fn keyword))
+(defn -main [& args]
+  (let [{:keys [options arguments errors]} (parse-opts args cli-options)]
+    (cond
+      errors (exit 1 errors))
+    (do-it options (first arguments))))
 
-(defn retrieve-activity [id] 
-  (json/read-str 
-    (:body (client/get (str "https://www.strava.com/api/v3/activities/" id) opts)) 
-    :key-fn keyword))
-(defn retrieve-activity-laps [id] 
-  (json/read-str 
-    (:body (client/get (str "https://www.strava.com/api/v3/activities/" id "/laps") opts)) 
-    :key-fn keyword))
-
-(defn write-activity [id] 
-  (spit (str "activity-" id ".json") 
-        (json/write-str (retrieve-activity id))))
-(defn write-activity-laps [id] 
-  (spit (str "activity-" id "-laps.json") 
-        (json/write-str (retrieve-activity-laps id))))
