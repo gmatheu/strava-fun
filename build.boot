@@ -1,8 +1,9 @@
 (set-env!
-  :source-paths #{"src/**/*.clj"}
+  :source-paths #{"src"}
   :dependencies '[[org.clojure/clojure "1.6.0"]
                   [org.clojure/data.json "0.2.6"]
-                  [clj-http "1.1.2"]])
+                  [clj-http "1.1.2"]
+                  [org.clojure/tools.namespace "0.2.10"]])
 
 (task-options!
   pom {:project 'strava-fun

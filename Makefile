@@ -10,4 +10,4 @@ boot:
 	chmod +x boot
 
 repl: boot
-	./boot repl
+	./boot -s src repl -e "(require '[clojure.tools.namespace.repl :refer [refresh]])"
