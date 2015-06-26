@@ -1,5 +1,6 @@
 (ns strava-fun.core
-  (:require [clojure.tools.cli :refer [parse-opts]])
+  (:require [clojure.tools.cli :refer [parse-opts]]
+            [strava-fun.strava :as strava])
   (:gen-class))
 
 (def cli-options
@@ -10,7 +11,9 @@
     (System/exit status))
 
 (defn do-it [options action]
-  (println (str "Doing " action " with token: " (:token options))))
+  (println (str "Doing " action))
+  (swap! strava/api-key (fn [old] (:token options)))
+  (println (strava/sprints)))
 
 (defn -main [& args]
   (let [{:keys [options arguments errors]} (parse-opts args cli-options)]

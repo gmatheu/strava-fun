@@ -13,27 +13,47 @@
       (:body (client/get url (opts)))
       :key-fn keyword)))
 
-(defn activities []
-  (retrieve "athlete/activities"))
-(defn activity [id]
-  (retrieve (str "activities/" id)))
-(defn laps [id]
-   (retrieve (str "activities/" id "/laps")))
-
 (defn write-resource [json name kind]
   (let [dir (io/as-file (str "." kind))
         target (io/as-file (str dir "/" name ".json"))]
-    (.mkdir dir)
-    (if (.exists target)
-      ()
-      (spit target (json/write-str json)))))
-(defn write-activity [id]
-  (write-resource (activity id) id "activity"))
-(defn write-laps [id]
-  (write-resource (laps id) id "laps"))
-(defn write-all [activities]
-    (map (fn [a] 
-          (let [id (:id a)]
-            (write-activity id) 
-            (write-laps id)))
-        activities))
+    (spit target (json/write-str json)))
+  json)
+;; (defn write-activity [id]
+;;   (write-resource (activity id) id "activity"))
+;; (defn write-laps [id]
+;;   (write-resource (laps id) id "laps"))
+;; (defn write-all [activities]
+;;     (map (fn [a] 
+;;           (let [id (:id a)]
+;;             (write-activity id) 
+;;             (write-laps id)))
+;;         activities))
+
+(defn activities []
+  (println "Retrieving activities")
+  (retrieve "athlete/activities"))
+(defn activity [id]
+  (println (str "Retrieving activity: " id))
+  (let [kind "activities" 
+        filename (str "." kind "/" id ".json")]
+    (if (-> filename io/as-file .exists)
+      (json/read-str (slurp filename))
+      (write-resource (retrieve (str "activities/" id))
+                                id kind))))
+(defn laps [id]
+  (println (str "Retrieving activity laps: " id))
+  (let [kind "laps" 
+        filename (str "." kind "/" id ".json")]
+    (if (-> filename io/as-file .exists)
+      (json/read-str (slurp filename))
+      (write-resource (retrieve (str "activities/" id "/laps"))
+                                id kind))))
+
+(def average (:average_speed activity))
+(defn round-to-hundreds [value] (* (Math/round (/ (double value) 100)) 100))
+(def sprints (filter #(< (* average 1.05) (:average_speed %)) laps))
+(group-by #(round-to-hundreds (:distance %)) sprints)
+
+(defn sprints []
+  (let [laps (map (fn [a] (laps (:id a))) (activities))]
+    laps))
